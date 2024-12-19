@@ -36,4 +36,7 @@ initializer.o: initializer.c shared_mem.h logger.h
 clean:
 	rm -f receptionist visitor monitor initializer closing *.o
 
+run:
+	./initializer
+
 .PHONY: all clean

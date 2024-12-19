@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 
 int main(int argc, char *argv[]) {
-    
+    argc = argc;
     int order_time = atoi(argv[2]);
     key_t shm_key = atoi(argv[4]);
     int shm_id = shmget(shm_key, sizeof(shared_data), IPC_CREAT | 0666);
@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
         if(data->fcfs.length == 0){
             log_event("No visitors in the waiting buffer");
             sleep(1);
-
         } else {
             //Wait until a table get free.
             while(data->tables[0].isOccupied == true && data->tables[1].isOccupied == true && data->tables[2].isOccupied == true){
@@ -119,9 +118,7 @@ int main(int argc, char *argv[]) {
 
     //Receptionist wait for the last visitors to leave.
     while(data->tables[0].isOccupied == true || data->tables[1].isOccupied == true || data->tables[2].isOccupied == true){
-        char log_msg[100];
-        sprintf(log_msg, "Receptionist is waiting for the last visitors to leave.");
-        log_event(log_msg);
+        log_event("Receptionist is waiting for the last visitors to leave.");
         sleep(1);
     }
 
@@ -137,9 +134,7 @@ int main(int argc, char *argv[]) {
     printf("Salads consumed: %d\n", data->shared_stats.salads_consumed);
     printf("Total visitors served: %d\n", data->shared_stats.visitors_served);
 
-    char log_msg[100];
-    sprintf(log_msg, "Receptionist colect the data and now is closing the bar.");
-    log_event(log_msg);
+    log_event("Receptionist finished");
 
     if (shmdt(data) < 0) {
         perror("shmdt failed");

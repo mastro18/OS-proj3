@@ -48,7 +48,7 @@ int main() {
     int num_visitors = 212;     //Number of visitors that will come to bar.(can be changed)
     int order_time = 2;         //Order and rest time can change if you like.
     int rest_time = 3;
-
+    
     srand(time(NULL));
 
     key_t shm_key = atoi(SHM_KEY);
@@ -111,13 +111,7 @@ int main() {
         perror("sem_init failed");
         exit(EXIT_FAILURE);
     }
-    if (sem_init(&data->receptionist_sem, 1, 1) != 0) {
-        perror("sem_init failed");
-        exit(EXIT_FAILURE);
-    }
 
-    //Bar goal of visitors to be served.(can be changed)
-    //data->BAR_CAPACITY = 210;
     data->is_closed = false;
 
     //Spawn receptionist.
@@ -126,7 +120,7 @@ int main() {
     //Spawn visitors with random arrival time.
     for (int i = 0; i < num_visitors; i++) {
 
-        int random_sleep_time = rand() % 3;    
+        int random_sleep_time = rand() % 3 + 1;    
         //sleep(random_sleep_time);
         spawn_visitor(rest_time,random_sleep_time);
     }

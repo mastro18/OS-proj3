@@ -4,7 +4,7 @@
 #include <sys/shm.h>
 #include "shared_mem.h"
 
-//Closing programm is like a bodygard that will not let visitors enter the waiting queue means
+//closing.c programm is like a bodygard that will not let visitors enter the waiting queue means
 //that the restaurant is closed and no more visitors can enter. The visitors inside the bar,
 //tables or the waiting queue will be serverd without any trouble.
 int main() {

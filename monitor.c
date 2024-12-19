@@ -16,9 +16,10 @@ void display_state(shared_data *data) {
         }
     }
 
+    //Print current state of the bar.
     printf("Current state of the bar:\n");
     for (int i = 0; i < 3; i++) {
-        //print table and its availability
+        //Print table and its availability
         printf("Table %d: ", i);
         if (data->tables[i].isOccupied) {
             printf("Occupied\n");
@@ -50,17 +51,14 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Attach the shared memory segment
     shared_data *data = (shared_data *)shmat(shm_id, NULL, 0);
     if (data == (void *)-1) {
         perror("shmat failed");
         exit(EXIT_FAILURE);
     }
-
-    // Display the current state of the bar
+    
     display_state(data);
 
-    // Detach from shared memory
     if (shmdt(data) < 0) {
         perror("shmdt failed");
         exit(EXIT_FAILURE);

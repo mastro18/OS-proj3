@@ -47,8 +47,6 @@ typedef struct {
 
     sem_t mutex;                //mutex for shared memory access.
 
-    sem_t receptionist_sem;
-
     bool is_closed;
 
 } shared_data;

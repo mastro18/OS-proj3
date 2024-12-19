@@ -10,11 +10,11 @@
 #include <sys/times.h>
 
 int main(int argc, char *argv[]) {
-    
+    argc = argc;
     int eating_time = atoi(argv[2]);
-
     key_t shm_key = atoi(argv[4]);
     int shm_id = shmget(shm_key, sizeof(shared_data), IPC_CREAT | 0666);
+
     if (shm_id < 0) {
         perror("shmget failed");
         exit(EXIT_FAILURE);
@@ -25,12 +25,6 @@ int main(int argc, char *argv[]) {
         perror("shmat failed");
         exit(EXIT_FAILURE);
     }
-    
-    sem_wait(&data->mutex);
-
-    
-    
-    sem_post(&data->mutex);
 
     double t1, t2, t3, ticspersec;
     ticspersec = (double) sysconf(_SC_CLK_TCK);
@@ -47,7 +41,7 @@ int main(int argc, char *argv[]) {
         char log_msg5[100];
         sprintf(log_msg5, "Visitor %d is leaving because the restaurant is closed.", getpid());
         log_event(log_msg5);
-        
+
         sem_post(&data->fcfs.bufferSemaphore);
         exit(EXIT_SUCCESS);
     }
@@ -56,8 +50,7 @@ int main(int argc, char *argv[]) {
     
     //Free position found, so put the visitor in the waiting buffer.
     int position = data->fcfs.rear;
-    data->fcfs.WaitingBuffer[position] = getpid();
-        
+    data->fcfs.WaitingBuffer[position] = getpid();    
     data->fcfs.rear++;
     data->fcfs.length++;
 
@@ -67,7 +60,6 @@ int main(int argc, char *argv[]) {
     }
 
     sem_post(&data->mutex);
-
         
     char log_msg[100];
     sprintf(log_msg, "Visitor %d is waiting for a table in waiting buffer.", getpid());
@@ -78,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     //A table was found so the visitor can leave from the waiting buffer.
     sem_post(&data->fcfs.bufferSemaphore);
-        
+    
     t2 = (double) times(NULL);
 
     //Time spent in queue.
@@ -87,7 +79,6 @@ int main(int argc, char *argv[]) {
     char log_msg1[100];
     sprintf(log_msg1, "Visitor %d waited %lf seconds in the queue and now is waiting to order.", getpid(), on_queue_time);
     log_event(log_msg1);
-
 
     int j = 0;
     int i = 0;
