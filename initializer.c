@@ -46,9 +46,9 @@ void spawn_visitor(int rest_time, int random_sleep_time) {
 
 int main() {
     int num_visitors = 212;     //Number of visitors that will come to bar.(can be changed)
-    int order_time = 2;         //Order and rest time can change if you like.
-    int rest_time = 3;
-    
+    int order_time = 4;         //Order and rest time can change if you like.
+    int rest_time = 9;
+
     srand(time(NULL));
 
     key_t shm_key = atoi(SHM_KEY);

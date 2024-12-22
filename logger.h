@@ -4,7 +4,7 @@
 
 void log_event(const char *event) {
     
-    FILE *log_file = fopen("bar_log.txt", "a");
+    FILE *log_file = fopen("log.txt", "a");
     if (log_file == NULL) {
         perror("Failed to open log file");
         return;

@@ -132,7 +132,12 @@ int main(int argc, char *argv[]) {
     sem_post(&data->mutex);  
     
     srand(time(NULL) ^ (getpid()<<16));
-    int random_eating_time = (0.7 * eating_time) + rand() % (eating_time - (int)(0.7 * eating_time));
+    int random_eating_time;
+    if (eating_time > 0) {
+        random_eating_time = (0.7 * eating_time) + rand() % (eating_time - (int)(0.7 * eating_time));
+    } else {
+        random_eating_time = 0;
+    }
     
     char log_msg2[100];
     sprintf(log_msg2, "Visitor %d will be eating for %d seconds.", getpid(), random_eating_time);

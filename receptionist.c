@@ -44,8 +44,20 @@ int main(int argc, char *argv[]) {
                 log_event("Receptionist found a free table for visitors.");
 
                 for(int j = 0; j < 3; j++){
-                    if(data->tables[j].isOccupied == false){
+                    if(k != -1){              
 
+                        char log_msg[100];
+                        sprintf(log_msg, "Visitor %d is scheduled to sit at table %d and chair %d", data->fcfs.WaitingBuffer[data->fcfs.front], j, data->tables[j].chairsOccupied);
+                        log_event(log_msg);
+
+                        data->tables[k].chairs[data->tables[k].chairsOccupied] = data->fcfs.WaitingBuffer[data->fcfs.front];
+                        data->tables[k].chairsOccupied++;
+                        data->fcfs.WaitingBuffer[data->fcfs.front] = 0;
+                        //Remove the visitor from the waiting buffer.
+                        sem_post(&data->fcfs.positionSemaphore[data->fcfs.front]);
+                        
+                        break;
+                    }else if (data->tables[j].isOccupied == false){
                         k = j;
 
                         char log_msg[100];
@@ -61,19 +73,7 @@ int main(int argc, char *argv[]) {
                         sem_post(&data->fcfs.positionSemaphore[data->fcfs.front]);
                         
                         break;
-                    }else if (j == k){
                         
-                        char log_msg[100];
-                        sprintf(log_msg, "Visitor %d is scheduled to sit at table %d and chair %d", data->fcfs.WaitingBuffer[data->fcfs.front], j, data->tables[j].chairsOccupied);
-                        log_event(log_msg);
-
-                        data->tables[j].chairs[data->tables[j].chairsOccupied] = data->fcfs.WaitingBuffer[data->fcfs.front];
-                        data->tables[j].chairsOccupied++;
-                        data->fcfs.WaitingBuffer[data->fcfs.front] = 0;
-                        //Remove the visitor from the waiting buffer.
-                        sem_post(&data->fcfs.positionSemaphore[data->fcfs.front]);
-                        
-                        break;
                     }
                 }
                                
@@ -95,13 +95,18 @@ int main(int argc, char *argv[]) {
 
             for(int i = 0; i < 4; i++){
                 if(data->tables[k].chairs[i] != 0){
-                    int random_order_time = 0.5 * order_time + rand() % (int)(order_time - 0.5 * order_time);
+                    int random_order_time;
+                    if(order_time > 0){
+                        random_order_time = 0.5 * order_time + rand() % (int)(order_time - 0.5 * order_time);
+                    } else {
+                        random_order_time = 0;
+                    }
                     
                     char log_msg[100];
                     sprintf(log_msg, "Receptionist is taking order from visitor %d, at table %d and chair %d", data->tables[k].chairs[i],k,i);
                     log_event(log_msg);
 
-                    sleep(random_order_time); 
+                    sleep(0); 
                     //Order was taken so visitor can start talking and eating.       
                     sem_post(&data->tables[k].waitOnChair[i]);
                 }
