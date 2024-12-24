@@ -3,11 +3,11 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <semaphore.h>
-#include "shared_mem.h"
-#include <time.h>
-#include "logger.h"
 #include <unistd.h>
 #include <sys/times.h>
+#include <time.h>
+#include "shared_mem.h"
+#include "logger.h"
 
 int main(int argc, char *argv[]) {
     argc = argc;
@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
         perror("shmget failed");
         exit(EXIT_FAILURE);
     }
-    
+
     shared_data *data = (shared_data *)shmat(shm_id, NULL, 0);
-    if (data == (void *)-1) {
+    if (*(int*)data == -1) {
         perror("shmat failed");
         exit(EXIT_FAILURE);
     }
@@ -45,9 +45,9 @@ int main(int argc, char *argv[]) {
         sem_post(&data->fcfs.bufferSemaphore);
         exit(EXIT_SUCCESS);
     }
-
-    t1 = (double) times(NULL);
     
+    t1 = (double) times(NULL);
+
     //Free position found, so put the visitor in the waiting buffer.
     int position = data->fcfs.rear;
     data->fcfs.WaitingBuffer[position] = getpid();    
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     }
 
     sem_post(&data->mutex);
-        
+
     char log_msg[100];
     sprintf(log_msg, "Visitor %d is waiting for a table in waiting buffer.", getpid());
     log_event(log_msg);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     //A table was found so the visitor can leave from the waiting buffer.
     sem_post(&data->fcfs.bufferSemaphore);
-    
+
     t2 = (double) times(NULL);
 
     //Time spent in queue.
@@ -101,14 +101,14 @@ int main(int argc, char *argv[]) {
     char log_msg11[100];
     sprintf(log_msg11, "Visitor %d is waiting to order.", getpid());
     log_event(log_msg11);
-    
+
     //Visitor found its chair and table and now is waiting to order.
     sem_wait(&data->tables[j].waitOnChair[i]);
 
     sem_wait(&data->mutex);
 
     data->shared_stats.visitors_served++;
-    
+
     //Receptionist came to take visitor's order and now is ordering.
     srand(time(NULL) ^ (getpid()<<16));
     int order = rand() % 3;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     }
 
     sem_post(&data->mutex);  
-    
+
     srand(time(NULL) ^ (getpid()<<16));
     int random_eating_time;
     if (eating_time > 0) {
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
     } else {
         random_eating_time = 0;
     }
-    
+
     char log_msg2[100];
     sprintf(log_msg2, "Visitor %d will be eating for %d seconds.", getpid(), random_eating_time);
     log_event(log_msg2);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     data->shared_stats.total_wait_time += on_queue_time;
 
     t3 = (double) times(NULL);
-    
+
     double stay_time = (t3 - t2) / ticspersec;
 
     data->shared_stats.total_stay_time += stay_time;
@@ -174,6 +174,6 @@ int main(int argc, char *argv[]) {
         perror("shmdt failed");
         exit(EXIT_FAILURE);
     }
-        
+
     return 0;
 }

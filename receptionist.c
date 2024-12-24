@@ -3,10 +3,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <semaphore.h>
-#include <time.h>
 #include "shared_mem.h"
 #include "logger.h"
-#include <sys/mman.h>
 
 int main(int argc, char *argv[]) {
     argc = argc;
@@ -20,7 +18,7 @@ int main(int argc, char *argv[]) {
     }
 
     shared_data *data = (shared_data *)shmat(shm_id, NULL, 0);
-    if (data == (void *)-1) {
+    if (*(int*)data == -1) {
         perror("shmat failed");
         exit(EXIT_FAILURE);
     }
@@ -29,7 +27,7 @@ int main(int argc, char *argv[]) {
     //Variable to keep the table number that is found free.
     int k = -1;
     while(1){
-        
+
         if(data->fcfs.length == 0){
             log_event("No visitors in the waiting buffer");
             sleep(1);
@@ -55,7 +53,7 @@ int main(int argc, char *argv[]) {
                         data->fcfs.WaitingBuffer[data->fcfs.front] = 0;
                         //Remove the visitor from the waiting buffer.
                         sem_post(&data->fcfs.positionSemaphore[data->fcfs.front]);
-                        
+
                         break;
                     }else if (data->tables[j].isOccupied == false){
                         k = j;
@@ -73,18 +71,17 @@ int main(int argc, char *argv[]) {
                         sem_post(&data->fcfs.positionSemaphore[data->fcfs.front]);
                         
                         break;
-                        
                     }
                 }
-                               
+
                 sem_wait(&data->mutex);               
-                
+
                 data->fcfs.front++;
                 data->fcfs.length--;
                 if(data->fcfs.front == MAX_VISITORS){
                     data->fcfs.front = 0;
                 }
-                
+
                 sem_post(&data->mutex);
             }
 
@@ -101,18 +98,17 @@ int main(int argc, char *argv[]) {
                     } else {
                         random_order_time = 0;
                     }
-                    
+
                     char log_msg[100];
                     sprintf(log_msg, "Receptionist is taking order from visitor %d, at table %d and chair %d", data->tables[k].chairs[i],k,i);
                     log_event(log_msg);
 
-                    sleep(0); 
+                    sleep(random_order_time); 
                     //Order was taken so visitor can start talking and eating.       
                     sem_post(&data->tables[k].waitOnChair[i]);
                 }
             }       
         }
-        
         k = -1;
         //Programm will stop when all visitors are served and there are not other visitors
         //waiting in the waiting buffer and the bar is closed.
@@ -130,7 +126,7 @@ int main(int argc, char *argv[]) {
     //Collect the data.
     data->shared_stats.avg_wait_time = data->shared_stats.total_wait_time / data->shared_stats.visitors_served;
     data->shared_stats.avg_stay_time = data->shared_stats.total_stay_time / data->shared_stats.visitors_served;
-    
+
     printf("Average wait time: %f\n", data->shared_stats.avg_wait_time);
     printf("Average stay time: %f\n", data->shared_stats.avg_stay_time);
     printf("Wine consumed: %d\n", data->shared_stats.wine_consumed);
@@ -145,6 +141,6 @@ int main(int argc, char *argv[]) {
         perror("shmdt failed");
         exit(EXIT_FAILURE);
     }
-    
+
     return 0;
 }

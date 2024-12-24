@@ -2,7 +2,7 @@
 #include <semaphore.h>
 #include <stdbool.h>
 
-#define MAX_VISITORS 100
+#define MAX_VISITORS 100    //Maximum number of visitors that can be in the waiting buffer.
 #define SHM_KEY "12347"
 
 struct Stats {
@@ -40,13 +40,13 @@ struct Table {
 
 typedef struct {
     struct Stats shared_stats;
-
+    
     struct WaitingBuffer fcfs;
 
     struct Table tables[3];
 
     sem_t mutex;                //mutex for shared memory access.
 
-    bool is_closed;
+    bool is_closed;             //Bool variable to close the bar.
 
 } shared_data;

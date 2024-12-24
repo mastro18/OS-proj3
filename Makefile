@@ -36,7 +36,8 @@ initializer.o: initializer.c shared_mem.h logger.h
 clean:
 	rm -f receptionist visitor monitor initializer closing *.o
 
+#./initializer <number_visitors> <order_time> <rest_time> <KEY>
 run:
-	./initializer
+	./initializer 212 0 0 12347
 
 .PHONY: all clean

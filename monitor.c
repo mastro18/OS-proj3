@@ -7,14 +7,14 @@
 void display_state(shared_data *data) {
 
     //print waiting buffer
-    printf("Waiting buffer:\n");
+    /*printf("Waiting buffer:\n");
     for (int i = 0; i < MAX_VISITORS; i++) {
         if (data->fcfs.WaitingBuffer[i] == 0) {
             printf("  Position %d: Empty\n", i);
         } else {
             printf("  Position %d: Visitor %d\n", i, data->fcfs.WaitingBuffer[i]);
         }
-    }
+    }*/
 
     //Print current state of the bar.
     printf("Current state of the bar:\n");
@@ -43,8 +43,14 @@ void display_state(shared_data *data) {
     printf("  Total visitors served: %d\n", data->shared_stats.visitors_served);
 }
 
-int main() {
-    key_t shm_key = atoi(SHM_KEY);
+int main(int argc, char *argv[]) {
+
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <executable> <shm_key>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    key_t shm_key = atoi(argv[2]);
     int shm_id = shmget(shm_key, sizeof(shared_data), 0666);
     if (shm_id < 0) {
         perror("shmget failed");
@@ -52,11 +58,11 @@ int main() {
     }
 
     shared_data *data = (shared_data *)shmat(shm_id, NULL, 0);
-    if (data == (void *)-1) {
+    if (*(int*)data == -1) {
         perror("shmat failed");
         exit(EXIT_FAILURE);
     }
-    
+
     display_state(data);
 
     if (shmdt(data) < 0) {
