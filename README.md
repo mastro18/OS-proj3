@@ -1,25 +1,160 @@
-Το project μου αποτελείται από 8 αρχεία: logger.h, shared_mem.h, Makefile, closing.c, initializer.c, monitor.c, receptionist.c, visitor.c.
+# Bar on the Path to Nemea -- Concurrent Systems Simulation
 
-Το πρόγραμμα τρέχει με την εντολή make run ή (./initializer <visitors_num> <order_time> <rest_time>  <KEY>) και τερματίζει όταν εξυπηρετηθούν όλοι οι visitors και τρέχοντας το πρόγραμμα closing (./closing <key>) σε διαφορετικό terminal.
+A concurrent systems simulation written in **C** that models a small
+outdoor bar visited by hikers on the path from **Petri to Nemea**.
 
-Δημιουργείτε και ένα txt αρχείο που περιέχει το logging με όνομα log.txt.
+The system demonstrates **process synchronization**, **shared memory
+communication**, and **POSIX semaphore coordination** between multiple
+independent programs.
 
+This project was developed for the **Operating Systems course** at the
+**University of Athens -- Department of Informatics and
+Telecommunications**.
 
-    • closing.c: Πρόγραμμα όπου μέσα από μια  μεταβλητή ενημερώνει τον receptionist ότι το μαγαζί κλείνει και δεν θα έρθουν άλλοι visitors στην ουρά. Οπότε από την στιγμή που θα τρέξει το πρόγραμμα (./closing <key>) και μετά, όσα visitors processes δεν έχουν μπει στην ουρά αναμονής (waiting buffer) θα τερματίζουν χωρίς να εξυπηρετηθούν γιατί το μπαρ κλείνει. Ο receptionist θα τερματίζει αφού δει ότι κλείνει το μπαρ και έχουν εξυπηρετηθεί όλοι οι πελάτες.
-      
-      
-    •  Logger.h: Έχει μια συνάρτηση όπου καλείται όταν τρέχουν τα προγράμματα visitors, receptionist και εκτυπώνει στο αρχείο log.txt όλο το ιστορικό με τα γεγονότα που συνέβαιναν μαζί με τον χρόνο που συνέβησαν.
+------------------------------------------------------------------------
 
-    • Makefile: make, make run, make clean.
+# What This Implementation Contains
 
+current codebase builds five executables:
 
-    • shared_mem.h: Περιέχει τις δομές, μεταβλητές και σημαιοφόρους που βρίσκονται στην κοινή μνήμη και θα χρησιμοποιηθούν από τα προγράμματα.
+- `initializer`: creates and initializes shared memory/semaphores, starts
+    receptionist and visitors
+- `receptionist`: serves visitors in FCFS order and assigns seats/orders
+- `visitor`: waits in queue, gets seated, orders, eats, then leaves
+- `monitor`: prints a snapshot of current bar state and statistics
+- `closing`: marks the bar as closed for new arrivals
 
-    • Monitor.c: Πρόγραμμα όπου εκτυπώνει την κατάσταση στα τραπέζια και στις καρέκλες, δηλαδή ποιος κάθεται και αν είναι ελεύθερα ή όχι. Επίσης εκτυπώνει και τα στατιστικά μέχρι εκείνη την χρονική στιγμή. Το τρέχουμε σε διαφορετικό terminal με την εντολή (./monitor -s key)(όπως αναφέρεται στην εκφώνηση της εργασίας).
-      
-    • Initializer.c: Είναι το κύριο πρόγραμμα όπου αρχικά αρχικοποιεί τον αριθμό επισκεπτών που θα έρθουν δηλαδή πόσοι visitors θα δημιουργηθούν με fork, τον χρόνο όπου κάνει κάθε επισκέπτης να παραγγείλει και τον χρόνο όπου τρώει και μιλάει, και αυτοί οι χρόνοι περνιούνται ως όρισμα στο πρόγραμμα του receptionist και visitor όπως διευκρινίζεται και στην εκφώνηση. Μετά αρχικοποιεί όλες τις μεταβλητές και σημαιοφόρους που βρίσκονται στην κοινή μνήμη. Και τέλος, χρησιμοποιώντας fork(), βάσει τον αριθμό επισκεπτών που αρχικοποιήσαμε, δημιουργούνται τόσες διεργασίες επισκεπτών και μια διεργασία του receptionist.
+------------------------------------------------------------------------
 
-    • receptionist.c: Αρχικά τσεκάρει αν υπάρχουν επισκέπτες στην ουρά αναμονής. Αν δεν υπάρχουν συνεχίζει να περιμένει μέχρι να εμφανιστεί κάποιος ή να εκτελεστεί το πρόγραμμα closing. Αν υπάρχουν πελάτες τσεκάρει αν υπάρχει διαθέσιμο τραπέζι, αν όχι περιμένει. Αλλιώς ψάχνει να βρει πιο από τα 3 τραπέζια είναι διαθέσιμο και αφού το βρει τοποθετεί τον επισκέπτη στο τραπέζι και στην καρέκλα. Αν υπάρχουν και άλλοι που περιμένουν, τους αναθέτει και αυτούς καρέκλες στο συγκεκριμένο τραπέζι μέχρι να γεμίσει το τραπέζι ή να μην υπάρχουν άλλοι να περιμένουν. Μετά πάει σε κάθε καρέκλα του τραπεζιού και παίρνει παραγγελία από κάθε επισκέπτη. Αφού πάρει από όλους τσεκάρει αν υπάρχουν άλλοι πελάτες που περιμένουν και αν το μαγαζί είναι έτοιμο να κλείσει. Αν εξυπηρετούνται και οι δύο συνθήκες περιμένει να αδιάσουν όλα τα τραπέζια και μετά εκτυπώνει τα στατιστικά και τερματίζει, αλλιώς συνεχίζει από την αρχή. 
-      
-      
-    • visitor.c: Αρχικά όσοι επισκέπτες φτάσουν πρώτοι τοποθετούνται στην ουρά αναμονής αλλά αν δεν χωράνε, οι υπόλοιποι περιμένουν έξω μέχρι να αδειάσει η ουρά και να μπουν και αυτοί ή να φύγουν στην περίπτωση που κλείσει το μπαρ(Μπορούμε να ρυθμίσουμε αν θα τρέξουν όλα τα προγράμματα ταυτόχρονα ή αν θα τρέχουν μετά από ένα χρονικό διάστημα κάνοντας uncomment το sleep() στο πρόγραμμα intitializer.c ώστε οι επισκέπτες να φτάνουν όλοι ταυτόχρονα ή μετά από ένα τυχαίο χρονικό διάστημα(line 133)). Όταν τους αφήσει ο υπεύθυνος  να μπουν στο μπαρ, ψάχνουν να βρουν το τραπέζι και την καρέκλα που τους ανατέθηκε και όταν την βρουν περιμένουν εκεί μέχρι ο υπεύθυνος να έρθει να πάρει παραγγελία. Αφού τους πάρει, κάθονται λίγο και μετά αφού ενημερώσουν τα στατιστικά φεύγουν και το πρόγραμμα τερματίζει. (Μπορούμε να προσθέσουμε και επιπλέον επισκέπτες ανοίγοντας ένα νέο terminal και τρέχοντας το πρόγραμμα visitor.c όπως αναγράφεται στην εργασία).
+# Bar Model
+
+- 3 tables
+- 4 chairs per table
+- a FCFS waiting buffer with capacity `MAX_VISITORS` (100)
+- one receptionist process
+- many visitor processes
+
+Rules enforced by the simulation:
+
+- Visitors enter a shared waiting buffer (FCFS queue).
+- A table is considered occupied once the first visitor sits.
+- New visitors are seated at a table until its 4 chairs are filled.
+- If all 3 tables are occupied, receptionist waits for a table to become
+    free.
+- A table becomes available again only when all seated visitors at that
+    table have left.
+- If the bar is closed (`is_closed = true`), new visitors leave without
+    entering the queue.
+
+------------------------------------------------------------------------
+
+# Shared Memory Layout
+
+The shared segment stores:
+
+- Queue state (`front`, `rear`, `length`, waiting PIDs)
+- Per-visitor queue synchronization semaphores
+- Buffer-capacity semaphore
+- Table occupancy/chair PIDs (3 x 4)
+- Per-chair semaphore used to notify visitors when order-taking is done
+- Global mutex semaphore for protected updates
+- Aggregated statistics:
+    - total/average wait time
+    - total/average stay time
+    - wine/water/cheese/salad counters
+    - visitors served
+- Closing flag (`is_closed`)
+
+Defined in `shared_mem.h`.
+
+------------------------------------------------------------------------
+
+# Build
+
+Compile everything:
+
+```bash
+make
+```
+
+Clean binaries/objects:
+
+```bash
+make clean
+```
+
+Also available in the Makefile:
+
+```bash
+make run
+```
+
+`make run` executes:
+
+```bash
+./initializer 212 0 0 12347
+```
+
+------------------------------------------------------------------------
+
+# Run Commands
+
+Important: in this implementation, the shared memory key is fixed to
+`12347` (`SHM_KEY` in `shared_mem.h`). The initializer validates this.
+
+## Recommended (full simulation)
+
+```bash
+./initializer <num_visitors> <order_time> <rest_time> 12347
+```
+
+Example:
+
+```bash
+./initializer 120 5 10 12347
+```
+
+Meaning:
+
+- `num_visitors`: number of visitor processes to spawn
+- `order_time`: maximum receptionist ordering delay (seconds)
+- `rest_time`: maximum visitor eating/stay delay (seconds)
+
+## Manual tools during execution
+
+Print a state snapshot:
+
+```bash
+./monitor -s 12347
+```
+
+Close bar for new arrivals (existing queued/seated visitors continue):
+
+```bash
+./closing 12347
+```
+
+------------------------------------------------------------------------
+
+# Outputs
+
+At the end, receptionist prints:
+
+- Average wait time
+- Average stay time
+- Wine consumed
+- Water consumed
+- Cheese consumed
+- Salads consumed
+- Total visitors served
+
+Runtime events are appended to `log.txt` via `log_event()`.
+
+------------------------------------------------------------------------
+
+# Requirements
+
+- Linux environment
+- GCC compiler
+- POSIX semaphore support
+- System V shared memory support
