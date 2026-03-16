@@ -134,6 +134,12 @@ Close bar for new arrivals (existing queued/seated visitors continue):
 ./closing 12347
 ```
 
+Add visitors manual
+
+```bash
+./visitor -d <eating_time> -s 12347
+```
+
 ------------------------------------------------------------------------
 
 # Outputs
